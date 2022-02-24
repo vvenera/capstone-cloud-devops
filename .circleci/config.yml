@@ -1,0 +1,119 @@
+version: '2.1'
+orbs:
+  aws-eks: circleci/aws-eks@2.1.1
+  kubernetes: circleci/kubernetes@1.3
+
+jobs:
+  lint-files:
+    docker:
+      - image: python:3.7.3-stretch
+    working_directory: ~/capstone-cloud-devops
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1
+      - run:
+          name: install dependencies
+          command: |
+            python3 -m venv ~/.devops
+            . ~/.devops/bin/activate
+            make install
+            # Install hadolint
+            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
+            chmod +x /bin/hadolint
+      - save_cache:
+          paths:
+            - ~/.devops
+          key: v1
+      - run:
+          name: run lint
+          command: |
+            . ~/.devops/bin/activate
+            make lint
+
+  build-push-docker-image:
+    machine: true
+    working_directory: ~/capstone-cloud-devops
+    steps:
+      - checkout
+      - run:
+          name: build image
+          command: |
+            docker build -t venerakozueva/capstone-dev .
+      - run:
+          name: push to docker hub
+          command: |
+            docker login -u venerakozueva -p ${DOCKERHUB_PASSWORD}
+            docker push venerakozueva/capstone-dev
+
+  create-cluster:
+    docker:
+      - image: 'cimg/python:3.10'
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - aws-eks/create-cluster:
+          cluster-name: << parameters.cluster-name >>
+
+  test-cluster:
+    docker:
+      - image: 'cimg/python:3.10'
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - kubernetes/install
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+      - run:
+          command: |
+            kubectl get services
+            kubectl get pods
+          name: Test cluster
+
+  deploy:
+    docker:
+      - image: 'cimg/python:3.10'
+    parameters:
+      cluster-name:
+        description: |
+          Name of the EKS cluster
+        type: string
+    steps:
+      - checkout
+      - aws-eks/update-kubeconfig-with-authenticator:
+          cluster-name: << parameters.cluster-name >>
+          aws-region:  $AWS_REGION
+          install-kubectl: true
+      - kubernetes/create-or-update-resource:
+          resource-file-path: eks-deployment/deployment.yml
+          show-kubectl-command: true
+      - kubernetes/create-or-update-resource:
+          resource-file-path: eks-deployment/service.yml
+          show-kubectl-command: true
+
+
+workflows:
+  default:
+    jobs:
+      - lint-files
+      # - build-push-docker-image:
+      #     requires: [ lint-files ]
+      # - create-cluster:
+      #     cluster-name: myCapstone
+      #     requires: [ build-push-docker-image ]
+      # - test-cluster:
+      #     cluster-name: myCapstone
+      #     requires: [ create-cluster ]
+      # - deploy:
+      #     cluster-name: myCapstone
+         # requires: [ test-cluster ]
+      # - delete-cluster:
+      #     cluster-name: myCapstone

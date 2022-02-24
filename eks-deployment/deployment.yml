@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: capstone-devops
+  labels:
+    app: ven-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ven-app
+  template:
+    metadata:
+      labels:
+        app: ven-app
+        role: rolling-update
+    spec:
+      containers:
+      - name: capstone-container
+        image: venerakozueva/capstone-dev
+        imagePullPolicy: "Always"
+        ports:
+        - containerPort: 80
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1

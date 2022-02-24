@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: capstone-service
+spec:
+  selector:
+    app: ven-app
+  ports:
+    - port: 8000
+      targetPort: 80
+  type: LoadBalancer
