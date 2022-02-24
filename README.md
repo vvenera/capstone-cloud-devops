@@ -1,5 +1,5 @@
 ## CircleCI status
-
+[![CircleCI](https://circleci.com/gh/vvenera/capstone-cloud-devops/tree/master.svg?style=svg)](https://circleci.com/gh/vvenera/capstone-cloud-devops/tree/master)
 
 ## Project Capstone Cloud DevOps
 
