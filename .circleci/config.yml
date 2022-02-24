@@ -99,21 +99,20 @@ jobs:
           resource-file-path: eks-deployment/service.yml
           show-kubectl-command: true
 
-
 workflows:
   default:
     jobs:
       - lint-files
-      # - build-push-docker-image:
-      #     requires: [ lint-files ]
-      # - create-cluster:
-      #     cluster-name: myCapstone
-      #     requires: [ build-push-docker-image ]
-      # - test-cluster:
-      #     cluster-name: myCapstone
-      #     requires: [ create-cluster ]
-      # - deploy:
-      #     cluster-name: myCapstone
-         # requires: [ test-cluster ]
+      - build-push-docker-image:
+          requires: [ lint-files ]
+      - create-cluster:
+          cluster-name: myCapstone
+          requires: [ build-push-docker-image ]
+      - test-cluster:
+          cluster-name: myCapstone
+          requires: [ create-cluster ]
+      - deploy:
+          cluster-name: myCapstone
+         requires: [ test-cluster ]
       # - delete-cluster:
       #     cluster-name: myCapstone
