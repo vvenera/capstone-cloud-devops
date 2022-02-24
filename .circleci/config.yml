@@ -41,12 +41,12 @@ jobs:
       - run:
           name: build image
           command: |
-            docker build -t venerakozueva/capstone-dev .
+            docker build -t venerakozueva/capstone-prod .
       - run:
           name: push to docker hub
           command: |
             docker login -u venerakozueva -p ${DOCKERHUB_PASSWORD}
-            docker push venerakozueva/capstone-dev
+            docker push venerakozueva/capstone-prod
 
   create-cluster:
     docker:
@@ -105,12 +105,13 @@ workflows:
       - lint-files
       - build-push-docker-image:
           requires: [ lint-files ]
-      - create-cluster:
-          cluster-name: myCapstone
-          requires: [ build-push-docker-image ]
+      # - create-cluster:
+      #     cluster-name: myCapstone
+      #     requires: [ build-push-docker-image ]
       - test-cluster:
           cluster-name: myCapstone
-          requires: [ create-cluster ]
+          requires: [ build-push-docker-image ]
+          # requires: [ create-cluster ]
       - deploy:
           cluster-name: myCapstone
           requires: [ test-cluster ]
