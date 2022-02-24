@@ -102,15 +102,14 @@ jobs:
 workflows:
   default:
     jobs:
-      - lint-files
-      - build-push-docker-image:
-          requires: [ lint-files ]
+      # - lint-files
+      # - build-push-docker-image:
+      #     requires: [ lint-files ]
       # - create-cluster:
       #     cluster-name: myCapstone
       #     requires: [ build-push-docker-image ]
       - test-cluster:
           cluster-name: myCapstone
-          requires: [ build-push-docker-image ]
           # requires: [ create-cluster ]
       - deploy:
           cluster-name: myCapstone
