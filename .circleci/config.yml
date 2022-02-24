@@ -113,6 +113,6 @@ workflows:
           requires: [ create-cluster ]
       - deploy:
           cluster-name: myCapstone
-         requires: [ test-cluster ]
+          requires: [ test-cluster ]
       # - delete-cluster:
       #     cluster-name: myCapstone
