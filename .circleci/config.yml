@@ -102,7 +102,7 @@ jobs:
 workflows:
   default:
     jobs:
-      # - lint-files
+      - lint-files
       # - build-push-docker-image:
       #     requires: [ lint-files ]
       # - create-cluster:
