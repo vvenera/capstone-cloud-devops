@@ -105,12 +105,12 @@ workflows:
       # - lint-files
       # - build-push-docker-image:
       #     requires: [ lint-files ]
-      # - create-cluster:
-      #     cluster-name: myCapstone
-      #     requires: [ build-push-docker-image ]
+      - create-cluster:
+          cluster-name: myCapstone
+          # requires: [ build-push-docker-image ]
       - test-cluster:
           cluster-name: myCapstone
-          # requires: [ create-cluster ]
+          requires: [ create-cluster ]
       - deploy:
           cluster-name: myCapstone
           requires: [ test-cluster ]
